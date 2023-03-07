@@ -10,10 +10,7 @@ import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import SignIn from './components/SignIn/SignIn';
 import Register from './components/Register/Register';
 
-class App extends Component{
-  constructor(){
-    super();
-    this.state ={
+const initialState = {
       input: '',
       imageUrl: '',
       box:{},
@@ -26,7 +23,13 @@ class App extends Component{
         entries:0,
         joined:''
       }
-    }
+}
+
+
+class App extends Component{
+  constructor(){
+    super();
+    this.state =initialState;
   }
 
   loadUser = (data) => {
@@ -42,6 +45,7 @@ class App extends Component{
   
 
   calculateFaceLocation = (data) => {
+    
     const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
     const image = document.getElementById('inputimage');
     const width = Number(image.width);
@@ -63,84 +67,39 @@ class App extends Component{
   }
   
   onButtonSubmit = () =>{
-     //help me => user_id can be found in multiple ways, one way is in https://portal.clarifai.com/settings/profile 
-  const USER_ID = "ionutily";
-
-  this.setState({imageUrl: this.state.input});
-  // Your PAT (Personal Access Token) can be found in the portal under Authentification
-  // help me => PAT can be found in https://portal.clarifai.com/settings/authentication (create one if necessary!)
-  const PAT = "25192a1aa1bd438dbd71f5de4aa15d88"; 
   
-  
-  // help me => App Id is just the name of your app on the portal. 
-  const APP_ID = "my-first-application"; 
-
-
-  // Change these to whatever model and image input you want to use
-  // help me => https://help.clarifai.com/hc/en-us/articles/1500007677141-Where-to-find-your-Model-IDs-and-Model-Version-IDs
-  const MODEL_ID = "face-detection";
-  const MODEL_VERSION_ID = "6dc7e46bc9124c5c8824be4822abe105";
-
-  const imageUrl = this.state.input;
-
-  ///////////////////////////////////////////////////////////////////////////////////
-  // YOU DO NOT NEED TO CHANGE ANYTHING BELOW THIS LINE TO RUN THIS EXAMPLE
-  ///////////////////////////////////////////////////////////////////////////////////
-  const raw = JSON.stringify({
-    user_app_id: {
-      user_id: USER_ID,
-      app_id: APP_ID,
-    },
-    inputs: [
-      {
-        data: {
-          image: {
-            url: imageUrl,
-          },
-        },
-      },
-    ],
-  });
-
-  const requestOptions = {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      Authorization: "Key " + PAT,
-    },
-    body: raw,
-  };
-
-  fetch(
-    "https://api.clarifai.com/v2/models/" +
-      MODEL_ID +
-      "/versions/" +
-      MODEL_VERSION_ID +
-      "/outputs",
-    requestOptions
-  )
-    .then((response) => response.json())
-    .then((response) => {
-      if(response){
-        fetch('http://localhost:3000/image',{
-              method: 'put',
-              headers: {'Content-Type' : 'application/json'},
-              body: JSON.stringify({
-              id:this.state.user.id
-            })
-        })
-        .then(response => response.json())
-        .then(count => {
-          this.setState(Object.assign(this.state.user, {entries:count}))
+   this.setState({imageUrl: this.state.input});
+   
+          fetch('http://ec2-18-156-162-30.eu-central-1.compute.amazonaws.com:3000/imageurl',{
+            method: 'post',
+            headers: {'Content-Type' : 'application/json'},
+            body: JSON.stringify({
+            input:this.state.input
           })
-      }
-    this.displayFaceBox(this.calculateFaceLocation(response))
+        })
+        .then((response) => response.json())
+        .then((response) => {
+            if(response){
+              fetch('http://ec2-18-156-162-30.eu-central-1.compute.amazonaws.com:3000/image',{
+                    method: 'put',
+                    headers: {'Content-Type' : 'application/json'},
+                    body: JSON.stringify({
+                    id:this.state.user.id
+                  })
+              })
+              .then(response => response.json())
+              .then(count => {
+                this.setState(Object.assign(this.state.user, {entries:count}))
+                })
+                .catch(console.log)
+            }
+          this.displayFaceBox(this.calculateFaceLocation(response))
   })
     .catch((error) => console.log("error", error));
 };
   onRouteChange = (route) =>{
     if(route === 'signout'){
-      this.setState({isSignedIn:false})
+      this.setState(initialState)
     }else if(route === 'home'){
       this.setState({isSignedIn:true})
     }
