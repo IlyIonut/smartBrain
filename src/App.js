@@ -69,13 +69,8 @@ class App extends Component{
   onButtonSubmit = () =>{
   
    this.setState({imageUrl: this.state.input});
-<<<<<<< HEAD
-
-          fetch('https://gentle-cliffs-23996.herokuapp.com/imageurl',{
-=======
    
           fetch('http://ec2-18-156-162-30.eu-central-1.compute.amazonaws.com:3000/imageurl',{
->>>>>>> e4a4a239298c7b9b8e0cfeadb0d502f0241dfcc8
             method: 'post',
             headers: {'Content-Type' : 'application/json'},
             body: JSON.stringify({
@@ -85,11 +80,7 @@ class App extends Component{
         .then((response) => response.json())
         .then((response) => {
             if(response){
-<<<<<<< HEAD
-              fetch('https://gentle-cliffs-23996.herokuapp.com/image',{
-=======
               fetch('http://ec2-18-156-162-30.eu-central-1.compute.amazonaws.com:3000/image',{
->>>>>>> e4a4a239298c7b9b8e0cfeadb0d502f0241dfcc8
                     method: 'put',
                     headers: {'Content-Type' : 'application/json'},
                     body: JSON.stringify({
